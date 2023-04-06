@@ -17,6 +17,7 @@ function bonsai_scripts_settings_page() {
 
   $wp_core_version_checked = isset($_POST['wp_core_version']) && $_POST['wp_core_version'] === 'on';
   $wp_cli_version_checked = isset($_POST['wp_cli_version']) && $_POST['wp_cli_version'] === 'on';
+  $wp_gf_version_checked = isset($_POST['wp_cli_version']) && $_POST['wp_gf_version'] === 'on';
 
   ?>
   <div class="wrap">
@@ -37,6 +38,13 @@ function bonsai_scripts_settings_page() {
               WP CLI Version
           </label>
 
+          <br>
+
+          <label>
+              <input type="checkbox" name="wp_gf_version" <?php if ($wp_gf_version_checked) echo 'checked'; ?> checked>
+              WP GF Version
+          </label>
+
           <br><br>
 
           <input type="submit" name="submit" class="button button-primary" value="Run WP-CLI Commands">
@@ -53,6 +61,10 @@ function bonsai_scripts_settings_page() {
 
               if ($wp_cli_version_checked) {
                   $commands[] = 'wp cli version';
+              }
+
+              if ($wp_gf_version_checked) {
+                  $commands[] = 'wp gf version';
               }
 
               if (count($commands) > 0) {

@@ -1,51 +1,36 @@
 <?php
-
 /*
-Plugin Name: Bonsai
-Description: Run WP-CLI commands from within WordPress
-Version: 0.0.0
+Plugin Name: WP CLI Plugin
 */
 
-add_action('admin_menu', 'wpcli_plugin_menu');
 function wpcli_plugin_menu() {
-    add_menu_page('Bonsai', 'Bonsai', 'manage_options', 'wpcli-plugin', 'wpcli_plugin_page');
+    add_menu_page('WP CLI Plugin', 'WP CLI Plugin', 'manage_options', 'wpcli-plugin', 'wpcli_plugin_settings_page');
 }
 
-function wpcli_plugin_page() {
+add_action('admin_menu', 'wpcli_plugin_menu');
+
+function wpcli_plugin_settings_page() {
+    if (!current_user_can('manage_options')) {
+        wp_die('You do not have sufficient permissions to access this page.');
+    }
     ?>
     <div class="wrap">
-        <h1>Bonsai</h1>
+        <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+
         <form method="post">
-            <?php wp_nonce_field('wpcli_plugin_execute_command', 'wpcli_plugin_nonce'); ?>
-            <label for="wpcli_command">Enter WP-CLI Command:</label>
-            <input type="text" id="wpcli_command" name="wpcli_command" size="50" />
-            <input type="submit" value="Execute Command" class="button button-primary" />
+            <?php wp_nonce_field('wpcli-plugin-nonce', 'wpcli-plugin-nonce-field'); ?>
+            <input type="hidden" name="wpcli_plugin_action" value="run_wpcli_command">
+            <input type="submit" name="run_wpcli_command" class="button button-primary" value="Run WP CLI Command">
         </form>
+
+        <div id="wpcli-plugin-output">
+            <?php
+            if (isset($_POST['wpcli_plugin_action']) && $_POST['wpcli_plugin_action'] === 'run_wpcli_command') {
+                $output = shell_exec('wp core version');
+                echo "<pre>$output</pre>";
+            }
+            ?>
+        </div>
     </div>
     <?php
-}
-
-add_action('admin_post_wpcli_plugin_execute_command', 'wpcli_plugin_execute_command');
-function wpcli_plugin_execute_command() {
-    // Check security token
-    check_admin_referer('wpcli_plugin_execute_command', 'wpcli_plugin_nonce');
-
-    // Get user input and sanitize it
-    $command = sanitize_text_field($_POST['wpcli_command']);
-
-    // Validate command parameter to prevent command injection
-    if (strpos($command, 'wp ') === 0) {
-        // Execute the command using shell_exec
-        $output = shell_exec($command);
-
-        // Display the output to the user
-        echo '<div class="wrap">';
-        echo '<h1>Bonsai</h1>';
-        echo '<p>Command: <code>' . $command . '</code></p>';
-        echo '<pre>' . $output . '</pre>';
-        echo '</div>';
-    } else {
-        // Invalid command parameter
-        wp_die('Invalid WP-CLI command');
-    }
 }

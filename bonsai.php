@@ -19,13 +19,16 @@ function wpcli_plugin_settings_page() {
 
         <form method="post">
             <?php wp_nonce_field('wpcli-plugin-nonce', 'wpcli-plugin-nonce-field'); ?>
-            <input type="hidden" name="wpcli_plugin_action" value="run_wpcli_command">
-            <input type="submit" name="run_wpcli_command" class="button button-primary" value="Run WP CLI Command">
+            <input type="checkbox" name="wpcli_plugin_disable" id="wpcli-plugin-disable" value="1">
+            <label for="wpcli-plugin-disable"><?php _e( 'Disable WP CLI Command', 'wpcli-plugin' ); ?></label>
+            <input type="text" name="wpcli_plugin_action" value="wp core version" readonly>
+            <input type="submit" name="wp_core_version" class="button button-primary" value="Run WP CLI Command">
         </form>
 
         <div id="wpcli-plugin-output">
+          <p>Output:</p>
             <?php
-            if (isset($_POST['wpcli_plugin_action']) && $_POST['wpcli_plugin_action'] === 'run_wpcli_command') {
+            if (isset($_POST['wpcli_plugin_action']) && $_POST['wpcli_plugin_action'] === 'wp core version' && empty($_POST['wpcli_plugin_disable'])) {
                 $output = shell_exec('wp core version');
                 echo "<pre>$output</pre>";
             }
